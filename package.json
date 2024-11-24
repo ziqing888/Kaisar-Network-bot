@@ -1,8 +1,9 @@
 {
   "name": "kaisanode-bot",
   "version": "1.0.0",
-  "description": "一个自动化挖矿和任务领取工具，支持注册、登录、挖矿、任务奖励领取和每日签到。",
+  "description": "一个自动化挖矿和任务领取工具。",
   "main": "bot.js",
+  "type": "module", 
   "scripts": {
     "start": "node bot.js"
   },
@@ -11,7 +12,6 @@
     "https-proxy-agent": "^7.0.5",
     "chalk": "^5.3.0"
   },
-  "devDependencies": {},
   "keywords": [
     "kaisar-bot",
     "kaisar-node",
@@ -27,6 +27,6 @@
     "mining",
     "bot"
   ],
-  "author": "子清",
+  "author": "您的名字",
   "license": "MIT"
 }
