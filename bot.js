@@ -11,8 +11,8 @@ const channel = 'https://t.me/ksqxszq';
 
 const banner = `
 ${chalk.yellow('╔════════════════════════════════════════╗')}
-${chalk.yellow('║')}      🚀 ${chalk.green('Kaisar-Network-bot')} 🚀         ${chalk.yellow('║')}
-${chalk.yellow('║')}  👤  脚本编写：${chalk.blue(author)}              ${chalk.yellow('║')}
+${chalk.yellow('║')}      🚀 ${chalk.green('Kaisar-Network-bot')} 🚀          ${chalk.yellow('║')}
+${chalk.yellow('║')}  👤  脚本编写：${chalk.blue(author)}                ${chalk.yellow('║')}
 ${chalk.yellow('║')}  📢  电报频道：${chalk.cyan(channel)}    ${chalk.yellow('║')}
 ${chalk.yellow('╚════════════════════════════════════════╝')}
 `;
