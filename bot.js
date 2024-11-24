@@ -141,9 +141,14 @@ async function dailyCheckin(apiClient, extensionId) {
             logger(`[${extensionId}] 每日签到未成功: ${response.data?.message || '未知错误'}`, 'warn');
         }
     } catch (error) {
-        logger(`[${extensionId}] 每日签到时出错: ${error.message}`, 'error');
+        if (error.response?.status === 412) {
+            logger(`[${extensionId}] 每日签到已完成，无需重复签到。`, 'info');
+        } else {
+            logger(`[${extensionId}] 每日签到时出错: ${error.message}`, 'error');
+        }
     }
 }
+
 
 
 async function checkAndClaimTask(apiClient, extensionId) {
