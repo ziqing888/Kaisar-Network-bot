@@ -68,7 +68,7 @@ async function loginUser(email, password) {
         if (response.data?.data?.accessToken) {
             const token = response.data.data.accessToken;
             logger(`用户 ${email} 登录成功，令牌已生成。`, 'success');
-            saveToFile('配置/tokens.txt', token);
+            saveToFile('config/tokens.txt', token);
         } else {
             logger(`用户 ${email} 登录失败：${response.data.message}`, 'error');
         }
@@ -115,7 +115,7 @@ async function startMining(token, proxy) {
     try {
         const response = await apiClient.post('/mining/start', { extension: extensionId });
         logger(`挖矿已成功启动，扩展 ID：${extensionId}`, 'success');
-        saveToFile('配置/id.txt', extensionId);
+        saveToFile('config/id.txt', extensionId);
     } catch (error) {
         if (error.response) {
             logger(`HTTP 错误（状态码：${error.response.status}）：${error.response.data.message}`, 'error');
@@ -172,15 +172,15 @@ function askUserQuestion(query) {
     }));
 }
 
-
+// 主逻辑
 (async () => {
     logger('欢迎使用挖矿自动化工具！', 'info');
 
     const userChoice = await askUserQuestion('请选择操作：\n1. 注册并登录\n2. 开始挖矿\n请输入选项编号（1或2）：');
     if (userChoice === '1') {
-        const emails = readFromFile('配置/emails.txt');
+        const emails = readFromFile('config/emails.txt');
         if (!emails.length) {
-            logger('emails.txt 文件为空，请添加邮箱后重试。', 'error');
+            logger('config/emails.txt 文件为空，请添加邮箱后重试。', 'error');
             return;
         }
 
@@ -188,13 +188,13 @@ function askUserQuestion(query) {
         await registerAndLoginUsers(emails, password || '默认密码123');
     }
 
-    const tokens = readFromFile('配置/tokens.txt');
+    const tokens = readFromFile('config/tokens.txt');
     if (!tokens.length) {
         logger('未找到令牌，请先注册并登录。', 'error');
         return;
     }
 
-    const proxies = readFromFile('配置/proxy.txt');
+    const proxies = readFromFile('config/proxy.txt');
     for (let i = 0; i < tokens.length; i++) {
         const token = tokens[i];
         const proxy = proxies.length ? proxies[i % proxies.length] : null;
