@@ -1,0 +1,17 @@
+{
+  "name": "mining-bot",
+  "version": "1.0.0",
+  "description": "一个自动化挖矿和任务领取工具，支持注册、登录、挖矿、任务奖励领取和每日签到。",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "https-proxy-agent": "^7.0.5"
+  },
+  "devDependencies": {},
+  "keywords": ["挖矿", "自动化", "任务", "注册", "登录", "签到"],
+  "author": "您的名字",
+  "license": "MIT"
+}
