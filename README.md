@@ -25,8 +25,8 @@
 
 ### 1. 克隆或下载项目
 ```bash
-git clone https://github.com/ziqing888/kaisar-bot.git
-cd kaisar-bot
+git clone https://github.com/ziqing888/Kaisar-Network-bot.git
+cd Kaisar-Network-bot
 ```
 ### 2. 安装依赖
 确保已安装 Node.js 和 npm，然后运行：
