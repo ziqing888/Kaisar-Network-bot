@@ -8,7 +8,6 @@ import chalk from 'chalk';
 const author = '@qklxsqf';
 const channel = 'https://t.me/ksqxszq';
 
-
 const banner = `
 ${chalk.yellow('╔════════════════════════════════════════╗')}
 ${chalk.yellow('║')}      🚀 ${chalk.green('Kaisar-Network-bot')} 🚀          ${chalk.yellow('║')}
@@ -17,7 +16,7 @@ ${chalk.yellow('║')}  📢  电报频道：${chalk.cyan(channel)}    ${chalk.y
 ${chalk.yellow('╚════════════════════════════════════════╝')}
 `;
 
-
+// 日志记录
 function logger(message, level = 'info') {
     const levels = {
         info: chalk.blue('[信息]'),
@@ -32,7 +31,7 @@ function logger(message, level = 'info') {
     console.log(`${timestamp} ${prefix} ${message}`);
 }
 
-
+// 文件操作
 function readFromFile(fileName) {
     try {
         return fs.readFileSync(fileName, 'utf-8').split('\n').filter(line => line.trim() !== '');
@@ -51,7 +50,7 @@ function saveToFile(fileName, data) {
     }
 }
 
-
+// 生成扩展 ID
 function generateExtensionIds(tokens) {
     const extensionIds = tokens.map(() => crypto.randomUUID());
     extensionIds.forEach(extensionId => saveToFile('config/id.txt', extensionId));
@@ -59,7 +58,7 @@ function generateExtensionIds(tokens) {
     return extensionIds;
 }
 
-
+// 创建 API 客户端
 function createApiClient(token, proxy) {
     const config = {
         baseURL: 'https://zero-api.kaisar.io/',
@@ -80,7 +79,7 @@ function createApiClient(token, proxy) {
     return axios.create(config);
 }
 
-
+// 注册用户
 async function registerUser(email, password) {
     try {
         const response = await axios.post(
@@ -102,7 +101,7 @@ async function registerUser(email, password) {
     }
 }
 
-
+// 登录用户
 async function loginUser(email, password) {
     try {
         const response = await axios.post(
@@ -123,7 +122,7 @@ async function loginUser(email, password) {
     }
 }
 
-
+// 批量注册和登录
 async function registerAndLoginUsers(emails, password) {
     for (const email of emails) {
         logger(`正在处理用户 ${email} 的注册和登录...`, 'info');
@@ -131,7 +130,7 @@ async function registerAndLoginUsers(emails, password) {
     }
 }
 
-
+// 每日签到
 async function dailyCheckin(apiClient, extensionId) {
     try {
         const response = await apiClient.post('/checkin/check', {});
@@ -149,8 +148,7 @@ async function dailyCheckin(apiClient, extensionId) {
     }
 }
 
-
-
+// 检查并领取任务奖励
 async function checkAndClaimTask(apiClient, extensionId) {
     try {
         const response = await apiClient.get('/mission/tasks');
@@ -170,7 +168,7 @@ async function checkAndClaimTask(apiClient, extensionId) {
     }
 }
 
-
+// 获取挖矿数据
 async function getMiningData(apiClient, extensionId) {
     try {
         const response = await apiClient.get('/mining/current', {
@@ -184,7 +182,7 @@ async function getMiningData(apiClient, extensionId) {
             updateMiningPoint(extensionId, miningData);
 
             if (miningData.ended === 1) {
-                logger(`[${extensionId}] 挖矿已结束，领取挖矿积分...`, 'info');
+                logger(`[${extensionId}] 挖矿任务已结束，尝试领取积分并启动新的挖矿任务...`, 'info');
                 await claim(apiClient, extensionId);
             }
         }
@@ -193,7 +191,7 @@ async function getMiningData(apiClient, extensionId) {
     }
 }
 
-
+// 更新挖矿积分
 function updateMiningPoint(extensionId, miningData) {
     const elapsedTimeInHours = (Date.now() - new Date(miningData.start).getTime() - miningData.miss) / 36e5;
     const points = elapsedTimeInHours * miningData.hourly;
@@ -205,22 +203,48 @@ function updateMiningPoint(extensionId, miningData) {
     );
 }
 
-
+// 更新挖矿进度
 function updateProgress(extensionId, miningData) {
     const remainingTime = Math.max(0, miningData.end - Date.now());
     logger(`[${extensionId}] 挖矿进度: 剩余时间: ${(remainingTime / 1000).toFixed(2)} 秒`, 'warn');
 }
 
-
+// 领取积分并启动新任务
 async function claim(apiClient, extensionId) {
     try {
+        logger(`[${extensionId}] 尝试领取挖矿积分...`);
         const response = await apiClient.post('/mining/claim', { extension: extensionId });
-        logger(`[${extensionId}] 成功领取积分: ${JSON.stringify(response.data)}`, 'success');
+        if (response.data?.data) {
+            logger(`[${extensionId}] 积分领取成功: ${JSON.stringify(response.data.data)}`, 'success');
+        }
+        logger(`[${extensionId}] 尝试启动新的挖矿任务...`, 'info');
+        await startNewMiningTask(apiClient, extensionId);
     } catch (error) {
-        logger(`[${extensionId}] 领取积分时出错: ${error.message}`, 'error');
+        if (error.response?.status === 412) {
+            logger(`[${extensionId}] 积分领取失败（状态码 412），可能已领取，尝试启动新任务...`, 'warn');
+            await startNewMiningTask(apiClient, extensionId);
+        } else {
+            logger(`[${extensionId}] 领取积分时出错: ${error.message}`, 'error');
+        }
     }
 }
 
+// 启动新挖矿任务
+async function startNewMiningTask(apiClient, extensionId) {
+    try {
+        logger(`[${extensionId}] 尝试启动新的挖矿任务...`, 'info');
+        const response = await apiClient.post('/mining/start', { extension: extensionId });
+        if (response.data?.data) {
+            logger(`[${extensionId}] 新的挖矿任务启动成功: ${JSON.stringify(response.data.data)}`, 'success');
+        } else {
+            logger(`[${extensionId}] 新的挖矿任务启动失败: ${response.data?.message || '未知错误'}`, 'warn');
+        }
+    } catch (error) {
+        logger(`[${extensionId}] 启动新的挖矿任务时出错: ${error.message}`, 'error');
+    }
+}
+
+// Ping 并更新挖矿数据
 async function pingAndUpdate(apiClient, extensionId) {
     try {
         const response = await apiClient.post('/extension/ping', { extension: extensionId });
@@ -236,7 +260,7 @@ async function pingAndUpdate(apiClient, extensionId) {
     }
 }
 
-
+// 启动挖矿任务
 async function startMining() {
     const tokens = readFromFile('config/tokens.txt');
     const ids = readFromFile('config/id.txt');
@@ -279,7 +303,7 @@ async function startMining() {
     }
 }
 
-
+// 动态用户交互
 function askUserQuestion(query) {
     const rl = readline.createInterface({
         input: process.stdin,
@@ -292,7 +316,7 @@ function askUserQuestion(query) {
     }));
 }
 
-
+// 主逻辑
 (async () => {
     console.log(banner);
 
